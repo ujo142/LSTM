@@ -1,15 +1,14 @@
-from unicodedata import bidirectional
+from dataset import LSTMDataset
 import pytorch_lightning as pl
-from torch import nn
-from typing import List, Tuple, Optional, overload
-from torch import Tensor, optim
+from typing import List, Tuple
+from torch import Tensor, optim, nn
 import torch
 
-from dataset import LSTMDataset
+
 
 class LSTMModel(pl.LightningModule):
     def __init__(self, lr=6e-4,
-                 input_size=6,
+                 input_size=1,
                  output_size=1,
                  hidden_size=10,
                  n_layers=2,
@@ -38,12 +37,12 @@ class LSTMModel(pl.LightningModule):
         
     def forward(self, x) -> Tuple[Tensor, Tensor]:
         batch_size = x.size(0) # [50]
-        hidden_state = torch.zeros(self.n_layers, batch_size, self.hidden_size, device=self.device2) # [2,50,10]
-        cell_state = torch.zeros(self.n_layers, batch_size, self.hidden_size, device=self.device2) # [2,50,10]
+        hidden_state = torch.zeros(self.n_layers, batch_size, self.hidden_size, device=self.device2) 
+        cell_state = torch.zeros(self.n_layers, batch_size, self.hidden_size, device=self.device2) 
         hidden = (hidden_state, cell_state) 
-        output, (hidden_state, cell_state) = self.LSTM(x, hidden) # x->[50,200,26], output->[50,200,10]
+        output, (hidden_state, cell_state) = self.LSTM(x, hidden)
         output = self.relu(output)
-        output = output.reshape(output.shape[0], -1) # [50,2000]
+        output = output.reshape(output.shape[0], -1) 
         output = self.linear(output)
         return output
     
@@ -68,12 +67,14 @@ class LSTMModel(pl.LightningModule):
         train_dataloader = torch.utils.data.DataLoader(traffic_volume_train, batch_size=self.batch_size) 
         return train_dataloader
   
+  
     def validation_step(self, val_batch, batch_idx):
         features, targets = val_batch
         output = self(features) 
         output = output.view(-1)
         loss = self.loss(output, targets)
         self.log('val_loss', loss, prog_bar=True)
+
 
     def val_dataloader(self):
         traffic_volume_val =  LSTMDataset(validate=True)

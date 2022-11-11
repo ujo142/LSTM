@@ -1,12 +1,13 @@
 from model import LSTMModel
-from dataset import LSTMDataset
 import pytorch_lightning as pl
 
 
+
 def main():
-    traffic_volume =  LSTMDataset(train=True)
+    print("Initializing model...")
     model = LSTMModel()
-    trainer = pl.Trainer(max_epochs=80, accelerator="cpu", log_every_n_steps=1)
+    print("Training model...")
+    trainer = pl.Trainer(max_epochs=20, accelerator="cpu", log_every_n_steps=2)
     trainer.fit(model)
         
     

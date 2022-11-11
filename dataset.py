@@ -1,45 +1,44 @@
 import pandas as pd
-import torch
 import numpy as np
-import torch as nn
+import torch
 
 
 
 
 class LSTMDataset(torch.utils.data.Dataset):
-  def __init__(self, train=False, validate=False, test=False, window_size=200):
+  def __init__(self, train=False, 
+               validate=False,
+               test=False,
+               window_size=200):
 
-    #STEP1: Load the data
-    self.df_traffic_train = pd.read_csv("gold_train.csv", index_col=[0])
-    self.df_traffic_val = pd.read_csv("gold_val.csv", index_col=[0])
-    self.df_traffic_test = pd.read_csv("gold_test.csv", index_col=[0])
+    self.df_traffic_train = pd.read_csv("data/sunspot_train.csv", index_col=[0])
+    self.df_traffic_val = pd.read_csv("data/sunspot_val.csv", index_col=[0])
+    self.df_traffic_test = pd.read_csv("data/sunspot_test.csv", index_col=[0])
     
-    #STEP2: Creating Features
     if train: #process train dataset
       features = self.df_traffic_train
-      target = self.df_traffic_train.Price
+      target = self.df_traffic_train.Sunspots
     elif validate: #process validate dataset
       features = self.df_traffic_val
-      target = self.df_traffic_val.Price
+      target = self.df_traffic_val.Sunspots
     else: #process test dataset
       features = self.df_traffic_test
-      target = self.df_traffic_test.Price
+      target = self.df_traffic_test.Sunspots
     
-    #STEP3: Create windows/sequencing
     self.x, self.y = [], []
     for i in range(len(features) - window_size):
         v = features.iloc[i:(i + window_size)].values
         self.x.append(v)
         self.y.append(target.iloc[i + window_size])
     
-    #STEP4: Calculate length of dataset
     self.num_sample = len(self.x)
+    
     
   def __getitem__(self, index):
     x = self.x[index].astype(np.float32)
     y = self.y[index].astype(np.float32)
     return x, y
 
+
   def __len__(self):
-    #returns the total number of records for data set
     return self.num_sample

@@ -1,0 +1,5 @@
+pandas
+--pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
+pytorch-lightning
+seaborn
+sklearn
